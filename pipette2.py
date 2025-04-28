@@ -52,9 +52,28 @@ Today, you will learn **how to pipette accurately**, fix common mistakes, and te
   - P1000: 100–1000 µL
 - Rotate slightly past your volume, then dial back for best accuracy.
 """)
-        # st.image("p20_display.png", caption="P20 display", use_column_width=True)
-        # st.image("p200_display.png", caption="P200 display", use_column_width=True)
-        # st.image("p1000_display.png", caption="P1000 display", use_column_width=True)
+
+        st.image("pipette_volumes.png", caption="Pipette volume settings", use_column_width=True)
+
+        st.subheader("🧠 Match the Pipette Display to the Correct Volume:")
+        pipette1 = st.selectbox("Pipette 1 displays:", ["Select", "2 µL", "100 µL", "200 µL", "800 µL"], key="pipette1")
+        pipette2 = st.selectbox("Pipette 2 displays:", ["Select", "2 µL", "100 µL", "200 µL", "800 µL"], key="pipette2")
+        pipette3 = st.selectbox("Pipette 3 displays:", ["Select", "2 µL", "100 µL", "200 µL", "800 µL"], key="pipette3")
+        pipette4 = st.selectbox("Pipette 4 displays:", ["Select", "2 µL", "100 µL", "200 µL", "800 µL"], key="pipette4")
+
+        if st.button("Check My Matching Answers"):
+            correct_answers = {"pipette1": "800 µL", "pipette2": "200 µL", "pipette3": "100 µL", "pipette4": "2 µL"}
+            score = 0
+            if pipette1 == correct_answers["pipette1"]:
+                score += 1
+            if pipette2 == correct_answers["pipette2"]:
+                score += 1
+            if pipette3 == correct_answers["pipette3"]:
+                score += 1
+            if pipette4 == correct_answers["pipette4"]:
+                score += 1
+            st.success(f"You got {score} out of 4 matches correct!")
+
         answer1 = st.radio("Which pipette would you use for 150 µL?", ["P20", "P200", "P1000"], key="volume_check")
 
     with tabs[3]:
