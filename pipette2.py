@@ -4,13 +4,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 # --- CONFIG ---
 st.set_page_config(page_title="Buffs Biotech: Pipetting Masterclass", layout="wide")
 
 # --- GOOGLE SHEETS CONNECTION ---
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-credentials = ServiceAccountCredentials.from_json_keyfile_name('pipette-tutorial-b4fb2cbd5276.json', scope)
+credentials_dict = st.secrets["gcp_service_account"]
+credentials = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(credentials)
 sheet = client.open('PipettingProgress').sheet1
 
@@ -50,6 +52,9 @@ Today, you will learn **how to pipette accurately**, fix common mistakes, and te
   - P1000: 100–1000 µL
 - Rotate slightly past your volume, then dial back for best accuracy.
 """)
+        st.image("p20_display.png", caption="P20 display", use_column_width=True)
+        st.image("p200_display.png", caption="P200 display", use_column_width=True)
+        st.image("p1000_display.png", caption="P1000 display", use_column_width=True)
         answer1 = st.radio("Which pipette would you use for 150 µL?", ["P20", "P200", "P1000"], key="volume_check")
 
     with tabs[3]:
@@ -159,4 +164,3 @@ Today, you will learn **how to pipette accurately**, fix common mistakes, and te
             st.success("✅ Your progress has been recorded! Great job!")
 else:
     st.warning("👆 Please enter your name and partner's name above to start.")
-
