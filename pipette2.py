@@ -1,84 +1,162 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-st.set_page_config(page_title="Pipetting Like a Pro", layout="wide")
+# --- CONFIG ---
+st.set_page_config(page_title="Buffs Biotech: Pipetting Masterclass", layout="wide")
 
-st.title("🧪 Biotech in Action: Pipetting Like a Pro")
+# --- GOOGLE SHEETS CONNECTION ---
+scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+credentials = ServiceAccountCredentials.from_json_keyfile_name('pipette-tutorial-b4fb2cbd5276.json', scope)
+client = gspread.authorize(credentials)
+sheet = client.open('PipettingProgress').sheet1
 
-st.markdown("""
-### 🧠 Learning Goals
-- Set and operate three different sizes of micropipettes correctly.
-- Identify signs of common pipetting errors.
-- Handle tricky solutions like viscous liquids.
-- Use a balance to confirm your accuracy and precision.
+# --- STUDENT NAME ---
+name = st.text_input("Enter your name or nickname to track your progress:")
+partner = st.text_input("Enter your lab partner's name:")
 
----
+if name and partner:
+    st.success(f"Welcome {name} and {partner}! Let's master pipetting.")
 
-### 📘 Background Briefing
-You just got hired for a summer internship at a local biotech startup. Your job is to help prep small volumes of reagents for a new diagnostic test kit. On your first day, your supervisor hands you a box of pipettes and says:
+    tabs = st.tabs(["Intro", "Parts of Pipette", "Set Volume", "Attach Tip", "Draw Liquid", "Dispense Liquid", "Viscous Solutions", "Common Errors", "Practice & Reflection"])
 
-> "We need these buffers prepared accurately. If you can't pipette 50 µL correctly, none of our tests will work."
-
-They leave you in front of a balance and some colored solutions. No pressure. But don't worry—you've got this.
-
-Micropipettes are precision tools used in every biotechnology lab. Each has a specific range:
-- **P20:** 2–20 µL
-- **P200:** 20–200 µL
-- **P1000:** 100–1000 µL
-
-Using the wrong pipette or incorrect technique can result in wasted reagents or bad data.
+    with tabs[0]:
+        st.header("📘 Introduction to Pipetting")
+        st.markdown("""
+Micropipettes allow scientists to transfer tiny liquid volumes precisely — critical for every biotech lab!
+Today, you will learn **how to pipette accurately**, fix common mistakes, and test your skills.
 """)
 
-st.markdown("---")
+    with tabs[1]:
+        st.header("🔩 Parts of a Micropipette")
+        st.markdown("""
+- **Plunger** (pushes and releases liquid)
+- **Volume adjustment dial**
+- **Volume display window**
+- **Tip ejector button**
+- **Shaft (where the tip fits)**
+""")
 
-st.subheader("🎯 Concept Check")
+    with tabs[2]:
+        st.header("🎯 Setting the Volume")
+        st.markdown("""
+- Turn the dial clockwise to decrease, counterclockwise to increase.
+- Always stay within the correct range for each pipette:
+  - P20: 2–20 µL
+  - P200: 20–200 µL
+  - P1000: 100–1000 µL
+- Rotate slightly past your volume, then dial back for best accuracy.
+""")
+        answer1 = st.radio("Which pipette would you use for 150 µL?", ["P20", "P200", "P1000"], key="volume_check")
 
-q1 = st.radio("1. What happens if you use a P1000 to pipette 20 µL?",
-              ["It works perfectly", "It’s less accurate than using a P20", "It delivers more than you set it to", "Nothing happens"])
+    with tabs[3]:
+        st.header("🧪 Attaching the Tip")
+        st.markdown("""
+- Push the pipette firmly into the correct color tip:
+  - Clear for P20
+  - Yellow for P200
+  - Blue for P1000
+- Listen for a soft 'click' to confirm attachment.
+""")
 
-q2 = st.radio("2. Which of the following can cause inaccurate pipetting?",
-              ["Pushing the plunger to the second stop before drawing up liquid", "Using the wrong tip", "Not fully inserting the tip", "All of the above"])
+    with tabs[4]:
+        st.header("💧 Drawing Liquid")
+        st.markdown("""
+- Press the plunger to the **first stop**.
+- Insert the tip just 2–3 mm below the liquid surface.
+- Release the plunger slowly to draw liquid without bubbles.
+""")
+        answer2 = st.radio("Which stop do you press to when drawing liquid?", ["First Stop", "Second Stop"], key="draw_check")
 
-q3 = st.radio("3. You see a bubble in your pipette tip after drawing up liquid. What should you do?",
-              ["Just dispense it—close enough", "Shake the pipette", "Eject the liquid and try again", "Tap it to remove the bubble"])
+    with tabs[5]:
+        st.header("⚡ Dispensing Liquid")
+        st.markdown("""
+- Press gently to the **first stop** to dispense most liquid.
+- Press to the **second stop** to eject the final drop.
+- Remove tip while still pressing down.
+""")
+        answer3 = st.radio("Which stop do you press to when fully dispensing?", ["First Stop", "Second Stop"], key="dispense_check")
 
-st.text_input("4. Describe the difference between the first stop and second stop when using a micropipette.")
-st.text_input("5. You’re pipetting a thick syrup-like solution. What’s one trick you can use to make pipetting more accurate?")
+    with tabs[6]:
+        st.header("🧴 Handling Viscous Solutions")
+        st.markdown("""
+- Pre-wet the tip before aspirating.
+- Aspirate and dispense **slowly**.
+- Be patient — viscous liquids move slower than water!
+""")
+        answer4 = st.radio("When pipetting viscous liquids, should you pipette faster or slower?", ["Faster", "Slower"], key="viscous_check")
 
-st.markdown("---")
+    with tabs[7]:
+        st.header("🚨 Common Pipetting Mistakes")
+        st.markdown("""
+- Pressing to second stop before drawing = too much volume
+- Letting go too fast = air bubbles
+- Pipetting at wrong angle = inaccurate volume
+- Not changing tips = contamination
+""")
+        mistakes = st.checkbox("✅ I understand how to avoid common pipetting mistakes!")
 
-st.subheader("🛠️ Your Turn — Precision Challenge")
+    with tabs[8]:
+        st.header("🏋️ Practice Challenge + Reflection")
 
-st.markdown("#### Enter your pipetting data below for both red food coloring and viscous liquid")
+        pipettes = ["P20", "P200", "P1000"]
+        data = {}
 
-with st.expander("Pipetting Data Entry"):
-    df_combined = pd.DataFrame({
-        "Solution Type": ["Red Food Coloring"] * 3 + ["Viscous Liquid"] * 3,
-        "Target Volume (µL)": [20, 200, 1000, 20, 200, 1000],
-        "Trial 1 Mass (g)": [0.0] * 6,
-        "Trial 2 Mass (g)": [0.0] * 6,
-        "Trial 3 Mass (g)": [0.0] * 6,
-        "Notes": [""] * 6
-    })
+        for pipette in pipettes:
+            st.subheader(f"{pipette} Practice")
+            entries = []
+            for i in range(1, 6):
+                weight = st.number_input(f"{pipette} Entry {i} (g)", min_value=0.0, max_value=2.0, step=0.001, key=f"{pipette}_weight_{i}")
+                entries.append(weight)
 
-    edited_combined = st.data_editor(df_combined, num_rows="dynamic", key="combined_data_editor")
+            entries_np = np.array(entries)
+            mean_weight = np.mean(entries_np)
+            std_weight = np.std(entries_np)
 
-    if edited_combined is not None:
-        edited_combined["Average Mass (g)"] = edited_combined[["Trial 1 Mass (g)", "Trial 2 Mass (g)", "Trial 3 Mass (g)"]].mean(axis=1)
-        edited_combined["Std Dev (g)"] = edited_combined[["Trial 1 Mass (g)", "Trial 2 Mass (g)", "Trial 3 Mass (g)"]].std(axis=1)
-        st.dataframe(edited_combined)
+            st.write(f"**Average weight for {pipette}:** {mean_weight:.3f} g")
+            st.write(f"**Standard deviation for {pipette}:** {std_weight:.3f} g")
 
-st.markdown("---")
+            fig, ax = plt.subplots()
+            ax.bar(range(1, 6), entries)
+            ax.axhline(mean_weight, color='r', linestyle='--', label='Mean')
+            ax.set_title(f"{pipette} Weights")
+            ax.set_xlabel("Trial")
+            ax.set_ylabel("Weight (g)")
+            ax.legend()
+            st.pyplot(fig)
 
-st.subheader("📝 Wrap-Up: Reflection")
+            data[f"{pipette}_mean"] = mean_weight
+            data[f"{pipette}_std"] = std_weight
 
-st.text_area("1. Which liquid was harder to pipette accurately? Why?")
-st.text_area("2. What would happen if you messed up pipetting in a real biotech lab?")
-st.text_area("3. What would you do differently for a sensitive experiment?")
-st.text_area("4. Look at your standard deviations. What does the size of the standard deviation tell you about your experimental error or pipetting technique?")
+        st.markdown("---")
+        st.subheader("Reflection")
+        reflection1 = st.text_area("1. Why is pipetting accuracy important in biotechnology?")
+        reflection2 = st.text_area("2. Which pipette was hardest to use accurately and why?")
 
-st.success("Great job! You've practiced one of the most essential skills in biotechnology.")
+        if st.button("🚀 Submit My Progress!"):
+            progress = {
+                'Name': name,
+                'Partner': partner,
+                'Set Volume': answer1,
+                'Draw Liquid': answer2,
+                'Dispense Liquid': answer3,
+                'Viscous Liquid': answer4,
+                'Avoid Mistakes': 'Yes' if mistakes else 'No',
+                'P20 Mean': data['P20_mean'],
+                'P20 StdDev': data['P20_std'],
+                'P200 Mean': data['P200_mean'],
+                'P200 StdDev': data['P200_std'],
+                'P1000 Mean': data['P1000_mean'],
+                'P1000 StdDev': data['P1000_std'],
+                'Reflection 1': reflection1,
+                'Reflection 2': reflection2
+            }
 
-
+            sheet.append_row(list(progress.values()))
+            st.success("✅ Your progress has been recorded! Great job!")
+else:
+    st.warning("👆 Please enter your name and partner's name above to start.")
 
