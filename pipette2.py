@@ -52,9 +52,9 @@ Today, you will learn **how to pipette accurately**, fix common mistakes, and te
   - P1000: 100–1000 µL
 - Rotate slightly past your volume, then dial back for best accuracy.
 """)
-        st.image("p20_display.png", caption="P20 display", use_column_width=True)
-        st.image("p200_display.png", caption="P200 display", use_column_width=True)
-        st.image("p1000_display.png", caption="P1000 display", use_column_width=True)
+        # st.image("p20_display.png", caption="P20 display", use_column_width=True)
+        # st.image("p200_display.png", caption="P200 display", use_column_width=True)
+        # st.image("p1000_display.png", caption="P1000 display", use_column_width=True)
         answer1 = st.radio("Which pipette would you use for 150 µL?", ["P20", "P200", "P1000"], key="volume_check")
 
     with tabs[3]:
